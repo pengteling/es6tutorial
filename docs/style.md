@@ -1,12 +1,14 @@
 # 编程风格
 
-本章探讨如何将ES6的新语法，运用到编码实践之中，与传统的JavaScript语法结合在一起，写出合理的、易于阅读和维护的代码。多家公司和组织已经公开了它们的风格规范，具体可参阅[jscs.info](http://jscs.info/)，下面的内容主要参考了[Airbnb](https://github.com/airbnb/javascript)的JavaScript风格规范。
+本章探讨如何将 ES6 的新语法，运用到编码实践之中，与传统的 JavaScript 语法结合在一起，写出合理的、易于阅读和维护的代码。
+
+多家公司和组织已经公开了它们的风格规范，下面的内容主要参考了 [Airbnb](https://github.com/airbnb/javascript) 公司的 JavaScript 风格规范。
 
 ## 块级作用域
 
-**（1）let取代var**
+**（1）let 取代 var**
 
-ES6提出了两个新的声明变量的命令：`let`和`const`。其中，`let`完全可以取代`var`，因为两者语义相同，而且`let`没有副作用。
+ES6 提出了两个新的声明变量的命令：`let`和`const`。其中，`let`完全可以取代`var`，因为两者语义相同，而且`let`没有副作用。
 
 ```javascript
 'use strict';
@@ -20,14 +22,14 @@ for (let i = 0; i < 10; i++) {
 }
 ```
 
-上面代码如果用`var`替代`let`，实际上就声明了一个全局变量，这显然不是本意。变量应该只在其声明的代码块内有效，`var`命令做不到这一点。
+上面代码如果用`var`替代`let`，实际上就声明了两个全局变量，这显然不是本意。变量应该只在其声明的代码块内有效，`var`命令做不到这一点。
 
 `var`命令存在变量提升效用，`let`命令没有这个问题。
 
 ```javascript
 'use strict';
 
-if(true) {
+if (true) {
   console.log(x); // ReferenceError
   let x = 'hello';
 }
@@ -39,7 +41,9 @@ if(true) {
 
 **（2）全局常量和线程安全**
 
-在`let`和`const`之间，建议优先使用`const`，尤其是在全局环境，不应该设置变量，只应设置常量。这符合函数式编程思想，有利于将来的分布式运算。
+在`let`和`const`之间，建议优先使用`const`，尤其是在全局环境，不应该设置变量，只应设置常量。
+
+`const`优于`let`有几个原因。一个是`const`可以提醒阅读程序的人，这个变量不应该改变；另一个是`const`比较符合函数式编程思想，运算不改变值，只是新建值，而且这样也有利于将来的分布式运算；最后一个原因是 JavaScript 编译器会对`const`进行优化，所以多使用`const`，有利于提供程序的运行效率，也就是说`let`和`const`的本质区别，其实是编译器内部的处理不同。
 
 ```javascript
 // bad
@@ -58,11 +62,7 @@ const [a, b, c] = [1, 2, 3];
 
 所有的函数都应该设置为常量。
 
-长远来看，JavaScript可能会有多线程的实现（比如Intel的River Trail那一类的项目），这时`let`表示的变量，只应出现在单线程运行的代码中，不能是多线程共享的，这样有利于保证线程安全。
-
-**（3）严格模式**
-
-V8引擎只在严格模式之下，支持`let`。结合前两点，这实际上意味着，将来所有的编程都是针对严格模式的。
+长远来看，JavaScript 可能会有多线程的实现（比如 Intel 公司的 River Trail 那一类的项目），这时`let`表示的变量，只应出现在单线程运行的代码中，不能是多线程共享的，这样有利于保证线程安全。
 
 ## 字符串
 
@@ -288,7 +288,7 @@ const boundMethod = (...params) => method.apply(this, params);
 
 所有配置项都应该集中在一个对象，放在最后一个参数，布尔值不可以直接作为参数。
 
-```bash
+```javascript
 // bad
 function divide(a, b, option = false ) {
 }
@@ -329,7 +329,7 @@ function handleThings(opts = {}) {
 
 ## Map结构
 
-注意区分Object和Map，只有模拟实体对象时，才使用Object。如果只是需要`key: value`的数据结构，使用Map结构。因为Map有内建的遍历机制。
+注意区分Object和Map，只有模拟现实世界的实体对象时，才使用Object。如果只是需要`key: value`的数据结构，使用Map结构。因为Map有内建的遍历机制。
 
 ```javascript
 let map = new Map(arr);
@@ -427,22 +427,22 @@ module.exports = Breadcrumbs;
 // ES6的写法
 import React from 'react';
 
-const Breadcrumbs = React.createClass({
+class Breadcrumbs extends React.Component {
   render() {
     return <nav />;
   }
-});
+};
 
-export default Breadcrumbs
+export default Breadcrumbs;
 ```
 
-如果模块只有一个输出值，就使用`export default`，如果模块有多个输出值，就不使用`export default`，不要`export default`与普通的`export`同时使用。
+如果模块只有一个输出值，就使用`export default`，如果模块有多个输出值，就不使用`export default`，`export default`与普通的`export`不要同时使用。
 
 不要在模块输入中使用通配符。因为这样可以确保你的模块之中，有一个默认输出（export default）。
 
 ```javascript
 // bad
-import * as myObject './importModule';
+import * as myObject from './importModule';
 
 // good
 import myObject from './importModule';
@@ -470,18 +470,19 @@ export default StyleGuide;
 
 ## ESLint的使用
 
-ESLint是一个语法规则和代码风格的检查工具，可以用来保证写出语法正确、风格统一的代码。
+ESLint 是一个语法规则和代码风格的检查工具，可以用来保证写出语法正确、风格统一的代码。
 
-首先，安装ESLint。
+首先，安装 ESLint。
 
 ```bash
 $ npm i -g eslint
 ```
 
-然后，安装Airbnb语法规则。
+然后，安装 Airbnb 语法规则，以及 import、a11y、react 插件。
 
 ```bash
 $ npm i -g eslint-config-airbnb
+$ npm i -g eslint-plugin-import eslint-plugin-jsx-a11y eslint-plugin-react
 ```
 
 最后，在项目的根目录下新建一个`.eslintrc`文件，配置ESLint。
@@ -507,16 +508,18 @@ function greet() {
 greet();
 ```
 
-使用ESLint检查这个文件。
+使用 ESLint 检查这个文件，就会报出错误。
 
 ```bash
 $ eslint index.js
 index.js
+  1:1  error  Unexpected var, use let or const instead          no-var
   1:5  error  unusued is defined but never used                 no-unused-vars
   4:5  error  Expected indentation of 2 characters but found 4  indent
+  4:5  error  Unexpected var, use let or const instead          no-var
   5:5  error  Expected indentation of 2 characters but found 4  indent
 
-✖ 3 problems (3 errors, 0 warnings)
+✖ 5 problems (5 errors, 0 warnings)
 ```
 
-上面代码说明，原文件有三个错误，一个是定义了变量，却没有使用，另外两个是行首缩进为4个空格，而不是规定的2个空格。
+上面代码说明，原文件有五个错误，其中两个是不应该使用`var`命令，而要使用`let`或`const`；一个是定义了变量，却没有使用；另外两个是行首缩进为4个空格，而不是规定的2个空格。

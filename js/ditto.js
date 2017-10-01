@@ -18,6 +18,30 @@ var ditto = {
     run: initialize
 };
 
+/**
+ * 获取当前hash
+ *
+ * @param {string} hash 要解析的hash，默认取当前页面的hash，如： nav#类目 => {nav:nav, anchor:类目}
+ * @description 分导航和页面锚点
+ * @return {Object} {nav:导航, anchor:页面锚点}
+ */
+var getHash = function (hash) {
+  hash = hash || window.location.hash.substr(1);
+
+  if (!hash) {
+    return {
+      nav: '',
+      anchor: ''
+    }
+  }
+
+  hash = hash.split('#');
+  return {
+    nav: hash[0],
+    anchor: decodeURIComponent(hash[1] || '')
+  }
+};
+
 var disqusCode = '<h3>留言</h3><div id="disqus_thread"></div>';
 var menu = new Array();
 
@@ -56,16 +80,18 @@ function init_sidebar_section() {
             menu.push(this.href.slice(this.href.indexOf('#')));
         });
         $('#pageup').on('click', function() {
+            var hash = getHash().nav;
             for (var i = 0; i < menu.length; i++) {
-                if (location.hash === '') break;
-                if (menu[i] === location.hash) break;
+                if (hash === '') break;
+                if (menu[i] === '#' + hash) break;
             }
             location.hash = menu[i - 1]
         });
         $('#pagedown').on('click', function() {
+            var hash = getHash().nav;
             for (var i = 0; i < menu.length; i++) {
-                if (location.hash === '') break;
-                if (menu[i] === location.hash) break;
+                if (hash === '') break;
+                if (menu[i] === '#' + hash) break;
             }
             location.hash = menu[i + 1];
         });
@@ -113,7 +139,7 @@ function init_back_to_top_button() {
 
 function goTop(e) {
   if(e) e.preventDefault();
-  $('html body').animate({
+  $('html, body').animate({
     scrollTop: 0
   }, 200);
   history.pushState(null, null, '#' + location.hash.split('#')[1]);
@@ -126,23 +152,24 @@ function goSection(sectionId){
 }
 
 function init_edit_button() {
-    if (ditto.base_url === null) {
-        alert("Error! You didn't set 'base_url' when calling ditto.run()!");
+  if (ditto.base_url === null) {
+    alert("Error! You didn't set 'base_url' when calling ditto.run()!");
+  } else {
+    $(ditto.edit_id).show();
+    $(ditto.edit_id).on("click", function() {
+      var hash = location.hash.replace("#", "/");
+      if (/#.*$/.test(hash)) {
+        hash = hash.replace(/#.*$/, '');
+      }
+      if (hash === "") {
+        hash = "/" + ditto.index.replace(".md", "");
+      }
 
-    } else {
-        $(ditto.edit_id).show();
-        $(ditto.edit_id).on("click", function() {
-            var hash = location.hash.replace("#", "/");
-
-            if (hash === "") {
-                hash = "/" + ditto.index.replace(".md", "");
-            }
-
-            window.open(ditto.base_url + hash + ".md");
-            // open is better than redirecting, as the previous page history
-            // with redirect is a bit messed up
-        });
-    }
+      window.open(ditto.base_url + hash + ".md");
+      // open is better than redirecting, as the previous page history
+      // with redirect is a bit messed up
+    });
+  }
 }
 
 function replace_symbols(text) {
@@ -229,7 +256,7 @@ function normalize_paths() {
   // images
   $(ditto.content_id + " img").map(function() {
     var src = $(this).attr("src").replace("./", "");
-    if ($(this).attr("src").slice(0, 5) !== "http") {
+    if ($(this).attr("src").slice(0, 4) !== "http") {
       var pathname = location.pathname.substr(0, location.pathname.length - 1);
       var url = location.hash.replace("#", "");
 
@@ -260,7 +287,7 @@ function show_loading() {
   return loading;
 }
 
-function router() {	
+function router() { 
   var path = location.hash.replace(/#([^#]*)(#.*)?/, './$1');
 
   var hashArr = location.hash.split('#');
@@ -347,14 +374,13 @@ function router() {
         }
       }
     }
-
-    if (location.hash === '' || location.hash === menu[0]) {
+    if (location.hash === '' || '#' + getHash().nav === menu[0]) {
       $('#pageup').css('display', 'none');
     } else {
       $('#pageup').css('display', 'inline-block');
     }
 
-    if (location.hash === menu[(menu.length - 1)]) {
+    if ('#' + getHash().nav === menu[(menu.length - 1)]) {
       $('#pagedown').css('display', 'none');
     } else {
       $('#pagedown').css('display', 'inline-block');
